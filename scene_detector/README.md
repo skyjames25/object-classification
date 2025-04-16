@@ -1,57 +1,117 @@
-# CNN Image Classification with PyTorch
+# Scene Classification Model
 
-A deep learning project implementing a Convolutional Neural Network (CNN) using PyTorch for image classification.
-
-## Technologies Used
-- PyTorch
-- torchvision
-- PIL (Python Imaging Library)
-- NumPy
-
-## Project Structure
-The project is implemented as a Jupyter notebook (`cnn_train_and_inference.ipynb`) containing:
-- Data preprocessing and transformations
-- CNN model architecture
-- Training pipeline
-- Inference functionality
-
-## Setup and Dependencies
-```python
-pip install torch torchvision numpy Pillow
-```
+This project implements a Convolutional Neural Network (CNN) for scene classification using PyTorch. The model can classify images into different scene categories.
 
 ## Features
-- Custom dataset handling using PyTorch's Dataset class
-- Image transformations including resizing to 150x150
-- CNN architecture for image classification
-- Training loop with Adam optimizer
-- Model inference capabilities
 
-## Usage
-1. Open the Jupyter notebook `cnn_train_and_inference.ipynb`
-2. Follow the cells in sequence for:
-   - Data preparation
-   - Model training
-   - Making predictions
+- CNN-based scene classification
+- Web interface using Streamlit
+- Support for both training and inference
+- GPU acceleration support
+- Pre-trained model included
 
-## Model Architecture
-The CNN model includes:
-- Convolutional layers
-- Pooling layers
-- Fully connected layers
-- Adam optimizer for training
+## Requirements
 
-## Data Preprocessing
-Images are preprocessed using the following transformations:
-```python
-transforms.Compose([
-    transforms.Resize((150,150)),
-    # Additional transforms as defined in the notebook
-])
+- Python 3.x
+- PyTorch
+- torchvision
+- Pillow
+- Streamlit
+- numpy
+
+## Installation
+
+1. Clone this repository
+2. Install the required packages:
+```bash
+pip install torch torchvision pillow streamlit numpy
 ```
 
-## Contributing
-Feel free to fork this repository and submit pull requests for any improvements.
+## Project Structure
+
+- `scene_train.py`: Contains the model architecture and training code
+- `web_deployment.py`: Streamlit web interface for easy inference
+- `best_checkpoint.model`: Pre-trained model weights
+- `cnn_train_and_inference.ipynb`: Jupyter notebook with detailed training and inference examples
+
+## Usage
+
+### Training the Model
+
+To train the model on your own dataset:
+
+1. Organize your training data in the following structure:
+```
+seg_train/
+    ├── class1/
+    │   ├── image1.jpg
+    │   ├── image2.jpg
+    │   └── ...
+    ├── class2/
+    │   ├── image1.jpg
+    │   └── ...
+    └── ...
+```
+
+2. Run the training script:
+```bash
+python scene_train.py
+```
+
+### Using the Web Interface
+
+1. Start the Streamlit web interface:
+```bash
+streamlit run web_deployment.py
+```
+
+2. Open your web browser and navigate to the provided local URL
+3. Upload an image to get the scene classification prediction
+
+### Using the Model Programmatically
+
+```python
+from scene_train import ConvNet, transformer, classes
+import torch
+from PIL import Image
+
+# Load the model
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model = ConvNet(num_classes=6).to(device)
+model.load_state_dict(torch.load('best_checkpoint.model', map_location=device))
+model.eval()
+
+# Make predictions
+def predict_image(image_path):
+    image = Image.open(image_path)
+    image_tensor = transformer(image).float()
+    image_tensor = image_tensor.unsqueeze_(0).to(device)
+    output = model(image_tensor)
+    index = output.data.cpu().numpy().argmax()
+    return classes[index]
+
+# Example usage
+prediction = predict_image('path_to_your_image.jpg')
+print(f"Predicted scene: {prediction}")
+```
+
+## Model Architecture
+
+The model uses a CNN architecture with:
+- 3 convolutional layers
+- Batch normalization
+- ReLU activation
+- Max pooling
+- Fully connected layer for classification
+
+## Performance
+
+The model has been trained on a dataset of scene images and can classify images into 6 different scene categories. The pre-trained model achieves good accuracy on the test set.
 
 ## License
-[Add your chosen license here]
+
+This project is open source and available under the MIT License.
+
+## Contributing
+
+Feel free to submit issues and enhancement requests! 
